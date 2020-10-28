@@ -388,30 +388,45 @@ def train(hyp, opt, device, tb_writer=None):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
+    # 几个文件：模型参数快照文件，超参数文件，数据配置文件
     parser.add_argument('--weights', type=str, default='yolov5s.pt', help='initial weights path')
     parser.add_argument('--cfg', type=str, default='', help='model.yaml path')
     parser.add_argument('--data', type=str, default='data/coco128.yaml', help='data.yaml path')
     parser.add_argument('--hyp', type=str, default='data/hyp.scratch.yaml', help='hyperparameters path')
+    
+    # 一共训练300个epoch
     parser.add_argument('--epochs', type=int, default=300)
+    # batch=16
     parser.add_argument('--batch-size', type=int, default=16, help='total batch size for all GPUs')
+    # 640x640大小的图片
     parser.add_argument('--img-size', nargs='+', type=int, default=[640, 640], help='[train, test] image sizes')
     parser.add_argument('--rect', action='store_true', help='rectangular training')
+    # 恢复最近的训练
     parser.add_argument('--resume', nargs='?', const=True, default=False, help='resume most recent training')
     parser.add_argument('--nosave', action='store_true', help='only save final checkpoint')
     parser.add_argument('--notest', action='store_true', help='only test final epoch')
+    # auto anchor 开关
     parser.add_argument('--noautoanchor', action='store_true', help='disable autoanchor check')
+    # ？
     parser.add_argument('--evolve', action='store_true', help='evolve hyperparameters')
+    # ？
     parser.add_argument('--bucket', type=str, default='', help='gsutil bucket')
+    # 为了更快的训练，预先存储图片
     parser.add_argument('--cache-images', action='store_true', help='cache images for faster training')
     parser.add_argument('--image-weights', action='store_true', help='use weighted image selection for training')
     parser.add_argument('--name', default='', help='renames experiment folder exp{N} to exp{N}_{name} if supplied')
+    # 定义使用设备
     parser.add_argument('--device', default='', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
+    # 是否使用多尺度
     parser.add_argument('--multi-scale', action='store_true', help='vary img-size +/- 50%%')
+    # ？
     parser.add_argument('--single-cls', action='store_true', help='train as single-class dataset')
     parser.add_argument('--adam', action='store_true', help='use torch.optim.Adam() optimizer')
+    # 多卡分布式训练时，需要使用SyncBatchNorm
     parser.add_argument('--sync-bn', action='store_true', help='use SyncBatchNorm, only available in DDP mode')
     parser.add_argument('--local_rank', type=int, default=-1, help='DDP parameter, do not modify')
     parser.add_argument('--logdir', type=str, default='runs/', help='logging directory')
+    # data loader 的 workers
     parser.add_argument('--workers', type=int, default=8, help='maximum number of dataloader workers')
     opt = parser.parse_args()
 
@@ -487,6 +502,7 @@ if __name__ == '__main__':
                 'anchor_t': (1, 2.0, 8.0),  # anchor-multiple threshold
                 'anchors': (2, 2.0, 10.0),  # anchors per output grid (0 to ignore)
                 'fl_gamma': (0, 0.0, 2.0),  # focal loss gamma (efficientDet default gamma=1.5)
+                # hsv 数据增强
                 'hsv_h': (1, 0.0, 0.1),  # image HSV-Hue augmentation (fraction)
                 'hsv_s': (1, 0.0, 0.9),  # image HSV-Saturation augmentation (fraction)
                 'hsv_v': (1, 0.0, 0.9),  # image HSV-Value augmentation (fraction)
