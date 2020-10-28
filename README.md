@@ -17,9 +17,9 @@ This repository represents Ultralytics open-source research into future object d
 - **April 1, 2020**: Start development of future compound-scaled [YOLOv3](https://github.com/ultralytics/yolov3)/[YOLOv4](https://github.com/AlexeyAB/darknet)-based PyTorch models.
 
 
-## Pretrained Checkpoints
+## 预训练的模型参数快照
 
-| Model | AP<sup>val</sup> | AP<sup>test</sup> | AP<sub>50</sub> | Speed<sub>GPU</sub> | FPS<sub>GPU</sub> || params | FLOPS |
+| Model | AP<sup>val</sup> | AP<sup>test</sup> | AP<sub>50</sub> | Speed<sub>GPU</sub> | FPS<sub>GPU</sub> || params参数量 | FLOPS计算量 |
 |---------- |------ |------ |------ | -------- | ------| ------ |------  |  :------: |
 | [YOLOv5s](https://github.com/ultralytics/yolov5/releases/tag/v3.0)    | 37.0     | 37.0     | 56.2     | **2.4ms** | **416** || 7.5M   | 13.2B
 | [YOLOv5m](https://github.com/ultralytics/yolov5/releases/tag/v3.0)    | 44.3     | 44.3     | 63.2     | 3.4ms     | 294     || 21.8M  | 39.4B
@@ -30,21 +30,27 @@ This repository represents Ultralytics open-source research into future object d
 | | | | | | || |
 | [YOLOv3-SPP](https://github.com/ultralytics/yolov5/releases/tag/v3.0) | 45.6     | 45.5     | 65.2     | 4.5ms     | 222     || 63.0M  | 118.0B
 
-** AP<sup>test</sup> denotes COCO [test-dev2017](http://cocodataset.org/#upload) server results, all other AP results in the table denote val2017 accuracy.  
+** AP<sup>test</sup> denotes COCO [test-dev2017](http://cocodataset.org/#upload) server results, all other AP results in the table denote val2017 accuracy. 
+** AP 按照COCO的方式来定义。
 ** All AP numbers are for single-model single-scale without ensemble or test-time augmentation. **Reproduce** by `python test.py --data coco.yaml --img 640 --conf 0.001`  
-** Speed<sub>GPU</sub> measures end-to-end time per image averaged over 5000 COCO val2017 images using a GCP [n1-standard-16](https://cloud.google.com/compute/docs/machine-types#n1_standard_machine_types) instance with one V100 GPU, and includes image preprocessing, PyTorch FP16 image inference at --batch-size 32 --img-size 640, postprocessing and NMS. Average NMS time included in this chart is 1-2ms/img.  **Reproduce** by `python test.py --data coco.yaml --img 640 --conf 0.1`  
+** 计算AP时，单模型单尺度，没有用集成模型。
+ 
+** Speed<sub>GPU</sub> measures end-to-end time per image averaged over 5000 COCO val2017 images using a GCP [n1-standard-16](https://cloud.google.com/compute/docs/machine-types#n1_standard_machine_types) instance with one V100 GPU, and includes image preprocessing, PyTorch FP16 image inference at --batch-size 32 --img-size 640, postprocessing and NMS. Average NMS time included in this chart is 1-2ms/img.  **Reproduce** by `python test.py --data coco.yaml --img 640 --conf 0.1` 
+**重现**  by `python test.py --data coco.yaml --img 640 --conf 0.1`
 ** All checkpoints are trained to 300 epochs with default settings and hyperparameters (no autoaugmentation). 
+** 所有的模型参数快照都是训练了300代，用的是默认超参数，没有调参。
 ** Test Time Augmentation ([TTA](https://github.com/ultralytics/yolov5/issues/303)) runs at 3 image sizes. **Reproduce** by `python test.py --data coco.yaml --img 832 --augment` 
+** 测试时的增强用了3中图片大小。
 
-## Requirements
-
+## 依赖包的安装
+Torch >=1.6都行，安装命令如下：
 Python 3.8 or later with all [requirements.txt](https://github.com/ultralytics/yolov5/blob/master/requirements.txt) dependencies installed, including `torch>=1.6`. To install run:
 ```bash
 $ pip install -r requirements.txt
 ```
 
 
-## Tutorials
+## 项目包含
 
 * [Train Custom Data](https://github.com/ultralytics/yolov5/wiki/Train-Custom-Data)
 * [Multi-GPU Training](https://github.com/ultralytics/yolov5/issues/475)
@@ -57,7 +63,7 @@ $ pip install -r requirements.txt
 * [TensorRT Deployment](https://github.com/wang-xinyu/tensorrtx)
 
 
-## Environments
+## 环境准备
 
 YOLOv5 may be run in any of the following up-to-date verified environments (with all dependencies including [CUDA](https://developer.nvidia.com/cuda)/[CUDNN](https://developer.nvidia.com/cudnn), [Python](https://www.python.org/) and [PyTorch](https://pytorch.org/) preinstalled):
 
