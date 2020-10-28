@@ -44,7 +44,7 @@ def test(data,
         device = select_device(opt.device, batch_size=batch_size)
         save_txt = opt.save_txt  # save *.txt labels
 
-        # Remove previous
+        # Remove previous 删除之前的test结果
         if os.path.exists(save_dir):
             shutil.rmtree(save_dir)  # delete dir
         os.makedirs(save_dir)  # make new dir
@@ -55,7 +55,7 @@ def test(data,
                 shutil.rmtree(out)  # delete dir
             os.makedirs(out)  # make new dir
 
-        # Load model
+        # Load model 加载模型
         model = attempt_load(weights, map_location=device)  # load FP32 model
         imgsz = check_img_size(imgsz, s=model.stride.max())  # check img_size
 
@@ -63,7 +63,7 @@ def test(data,
         # if device.type != 'cpu' and torch.cuda.device_count() > 1:
         #     model = nn.DataParallel(model)
 
-    # Half
+    # Half，device 为gpu,使用model.half()
     half = device.type != 'cpu'  # half precision only supported on CUDA
     if half:
         model.half()
