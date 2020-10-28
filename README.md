@@ -67,7 +67,7 @@ YOLOv5 may be run in any of the following up-to-date verified environments (with
 - **Docker Image** https://hub.docker.com/r/ultralytics/yolov5. See [Docker Quickstart Guide](https://github.com/ultralytics/yolov5/wiki/Docker-Quickstart) ![Docker Pulls](https://img.shields.io/docker/pulls/ultralytics/yolov5?logo=docker)
 
 
-## Inference
+## 训练完成后的模型使用：推理
 
 detect.py runs inference on a variety of sources, downloading models automatically from the [latest YOLOv5 release](https://github.com/ultralytics/yolov5/releases) and saving results to `inference/output`.
 ```bash
@@ -81,7 +81,7 @@ $ python detect.py --source 0  # webcam
                             http://112.50.243.8/PLTV/88888888/224/3221225900/1.m3u8  # http stream
 ```
 
-To run inference on example images in `inference/images`:
+在图片`inference/images`上测试模型:
 ```bash
 $ python detect.py --source inference/images --weights yolov5s.pt --conf 0.25
 
@@ -120,9 +120,9 @@ prediction = model(imgs, size=640)  # includes NMS
 ```
 
 
-## Training
+## 训练
 
-Download [COCO](https://github.com/ultralytics/yolov5/blob/master/data/scripts/get_coco.sh) and run command below. Training times for YOLOv5s/m/l/x are 2/4/6/8 days on a single V100 (multi-GPU times faster). Use the largest `--batch-size` your GPU allows (batch sizes shown for 16 GB devices).
+下载COCO数据集 [COCO](https://github.com/ultralytics/yolov5/blob/master/data/scripts/get_coco.sh) 并运行以下命令. 用一块GPU,训练 YOLOv5s/m/l/x 这几个系列需要耗时 2/4/6/8 天,多卡会快些. 只要你显卡牛掰，尽量用大的 `--batch-size`，这里的bitch size是按照16 GB 的显卡设置的
 ```bash
 $ python train.py --data coco.yaml --cfg yolov5s.yaml --weights '' --batch-size 64
                                          yolov5m                                40
@@ -132,12 +132,12 @@ $ python train.py --data coco.yaml --cfg yolov5s.yaml --weights '' --batch-size 
 <img src="https://user-images.githubusercontent.com/26833433/90222759-949d8800-ddc1-11ea-9fa1-1c97eed2b963.png" width="900">
 
 
-## Citation
+## 引用
 
 [![DOI](https://zenodo.org/badge/264818686.svg)](https://zenodo.org/badge/latestdoi/264818686)
 
 
-## About Us
+## 关于我们
 
 Ultralytics is a U.S.-based particle physics and AI startup with over 6 years of expertise supporting government, academic and business clients. We offer a wide range of vision AI services, spanning from simple expert advice up to delivery of fully customized, end-to-end production solutions, including:
 - **Cloud-based AI** systems operating on **hundreds of HD video streams in realtime.**
