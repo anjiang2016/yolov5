@@ -1,4 +1,6 @@
+# 输入参数处理
 import argparse
+# 日志
 import logging
 import os
 import random
@@ -14,12 +16,15 @@ import torch.nn.functional as F
 import torch.optim as optim
 import torch.optim.lr_scheduler as lr_scheduler
 import torch.utils.data
+# xml文件分析器
 import yaml
 from torch.cuda import amp
 from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.utils.tensorboard import SummaryWriter
+# for 循环精度条
 from tqdm import tqdm
 
+# test应该是自己写的函数
 import test  # import test.py to get mAP after each epoch
 from models.yolo import Model
 from utils.datasets import create_dataloader
@@ -32,12 +37,14 @@ from utils.torch_utils import ModelEMA, select_device, intersect_dicts
 
 logger = logging.getLogger(__name__)
 
-
+# 训练
 def train(hyp, opt, device, tb_writer=None):
+    # 日志
     logger.info(f'Hyperparameters {hyp}')
     log_dir = Path(tb_writer.log_dir) if tb_writer else Path(opt.logdir) / 'evolve'  # logging directory
     wdir = log_dir / 'weights'  # weights directory
     os.makedirs(wdir, exist_ok=True)
+    # 模型参数快照
     last = wdir / 'last.pt'
     best = wdir / 'best.pt'
     results_file = str(log_dir / 'results.txt')
@@ -50,19 +57,20 @@ def train(hyp, opt, device, tb_writer=None):
     with open(log_dir / 'opt.yaml', 'w') as f:
         yaml.dump(vars(opt), f, sort_keys=False)
 
-    # Configure
+    # Configure 配置
     cuda = device.type != 'cpu'
     init_seeds(2 + rank)
     with open(opt.data) as f:
         data_dict = yaml.load(f, Loader=yaml.FullLoader)  # data dict
     with torch_distributed_zero_first(rank):
         check_dataset(data_dict)  # check
+    # 获取训练数据，获取测试数据
     train_path = data_dict['train']
     test_path = data_dict['val']
     nc, names = (1, ['item']) if opt.single_cls else (int(data_dict['nc']), data_dict['names'])  # number classes, names
     assert len(names) == nc, '%g names found for nc=%g dataset in %s' % (len(names), nc, opt.data)  # check
 
-    # Model
+    # Model 加载预训练模型
     pretrained = weights.endswith('.pt')
     if pretrained:
         with torch_distributed_zero_first(rank):
@@ -87,7 +95,7 @@ def train(hyp, opt, device, tb_writer=None):
                 print('freezing %s' % k)
                 v.requires_grad = False
 
-    # Optimizer
+    # Optimizer，关于优化的内容
     nbs = 64  # nominal batch size
     accumulate = max(round(nbs / total_batch_size), 1)  # accumulate loss before optimizing
     hyp['weight_decay'] *= total_batch_size * accumulate / nbs  # scale weight_decay
@@ -112,6 +120,7 @@ def train(hyp, opt, device, tb_writer=None):
     logger.info('Optimizer groups: %g .bias, %g conv.weight, %g other' % (len(pg2), len(pg1), len(pg0)))
     del pg0, pg1, pg2
 
+    # 定义学习率调整策略
     # Scheduler https://arxiv.org/pdf/1812.01187.pdf
     # https://pytorch.org/docs/stable/_modules/torch/optim/lr_scheduler.html#OneCycleLR
     lf = lambda x: ((1 + math.cos(x * math.pi / epochs)) / 2) * (1 - hyp['lrf']) + hyp['lrf']  # cosine
@@ -263,7 +272,7 @@ def train(hyp, opt, device, tb_writer=None):
                     ns = [math.ceil(x * sf / gs) * gs for x in imgs.shape[2:]]  # new shape (stretched to gs-multiple)
                     imgs = F.interpolate(imgs, size=ns, mode='bilinear', align_corners=False)
 
-            # Forward
+            # Forward，这里才是前向计算，前面都是准备工作，都准备了些啥？
             with amp.autocast(enabled=cuda):
                 pred = model(imgs)  # forward
                 loss, loss_items = compute_loss(pred, targets.to(device), model)  # loss scaled by batch_size
@@ -299,7 +308,7 @@ def train(hyp, opt, device, tb_writer=None):
 
             # end batch ------------------------------------------------------------------------------------------------
 
-        # Scheduler
+        # Scheduler，学习率调整
         lr = [x['lr'] for x in optimizer.param_groups]  # for tensorboard
         scheduler.step()
 
@@ -431,7 +440,7 @@ if __name__ == '__main__':
         opt.img_size.extend([opt.img_size[-1]] * (2 - len(opt.img_size)))  # extend to 2 sizes (train, test)
         log_dir = increment_dir(Path(opt.logdir) / 'exp', opt.name)  # runs/exp1
 
-    # DDP mode
+    # DDP mode， distributed process
     device = select_device(opt.device, batch_size=opt.batch_size)
     if opt.local_rank != -1:
         assert torch.cuda.device_count() > opt.local_rank
